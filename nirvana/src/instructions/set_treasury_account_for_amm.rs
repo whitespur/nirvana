@@ -1,0 +1,21 @@
+use crate::state::*;
+use crate::utils::admin;
+use anchor_lang::prelude::*;
+
+#[derive(Accounts)]
+pub struct SetTreasuryAccountForAmm<'info> {
+    pub nirv_center: Account<'info, NirvCenter>,
+
+    #[account(
+        mut,
+        constraint = money_market.nirv_center == nirv_center.key())
+    ]
+    pub money_market: Account<'info, MoneyMarket>,
+    pub authority: Signer<'info>,
+}
+#[access_control(admin(&ctx.accounts.nirv_center, &ctx.accounts.authority))]
+pub fn handler(ctx: Context<SetTreasuryAccountForAmm>, is_for_amm: bool) -> Result<()> {
+    let money_market = &mut ctx.accounts.money_market;
+    money_market.for_amm = is_for_amm;
+    Ok(())
+}
